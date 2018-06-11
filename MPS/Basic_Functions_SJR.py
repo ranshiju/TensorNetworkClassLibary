@@ -135,7 +135,7 @@ def print_dict(a, keys=None, welcome='', style_sep=': ', color='white', end='\n'
                 express += n.capitalize() + style_sep + str(a[n])
                 if n is not keys[-1]:
                     express += end
-    print(express, color)
+    cprint(express, color)
     return express
 
 
