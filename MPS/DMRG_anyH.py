@@ -5,7 +5,7 @@ import numpy as np
 import scipy.sparse.linalg as la
 import time
 
-is_debug = True
+is_debug = False
 
 
 def get_bond_energies(eb_full, positions, index2):
@@ -110,10 +110,10 @@ def dmrg_finite_size(para=None):
     A.calculate_entanglement_entropy()
     info['t_cost'] = time.time() - t_start
     print('Simulation finished in %g seconds' % info['t_cost'])
-    A.report_yourself()
+    # A.report_yourself()
     # A.check_orthogonality_by_tensors(tol=1e-14)
     # time.sleep(0.05)
-    print(ob['eb_full'])
+    # print(ob['eb_full'])
     # print(index2)
     # print(coeff2)
     # print(operators[4])

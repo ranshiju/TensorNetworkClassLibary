@@ -184,7 +184,7 @@ def input_and_check_type(right_type, name, print_result=True, dict_name='para'):
         except NameError or ValueError or SyntaxError:
             cprint('The input is illegal, please input again ...', 'magenta')
     if print_result:
-        print('You have set ' + colored(dict_name + '[' + name + '] = ' + str(value), 'cyan'))
+        print('You have set ' + colored(dict_name + '[\'' + name + '\'] = ' + str(value), 'cyan'))
     return value
 
 

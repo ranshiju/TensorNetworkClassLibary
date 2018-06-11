@@ -43,7 +43,7 @@ def sort_positions(pos, which='ascend'):
 
 # =========================================================
 is_from_input = True
-is_load_data = False
+is_load_data = True
 
 print('Thanks for using EasyStart_DMRG!' + colored('(v2018.06-1, by S.J Ran)', 'cyan'))
 print_sep()
