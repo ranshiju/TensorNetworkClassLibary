@@ -2,10 +2,10 @@ from MPS_Class import MpsOpenBoundaryClass as Mob
 from Parameters import parameter_dmrg
 import Hamiltonian_Module as Hm
 import numpy as np
-import scipy.sparse.linalg as la
 import time
 
-is_debug = False
+is_debug = True
+is_fast_mode = True
 
 
 def get_bond_energies(eb_full, positions, index2):
@@ -43,8 +43,11 @@ def dmrg_finite_size(para=None):
             para['square_width'], para['square_height'], para['bound_cond'])
     index2 = Hm.interactions_position2full_index_heisenberg_two_body(para['positions_h2'])
     para['nh'] = index2.shape[0]  # number of two-body interactions
+    # Initialize MPS
+    A = Mob(length=para['l'], d=para['d'], chi=para['chi'], way='qr', ini_way='r', debug=is_debug,
+            is_fast_mode=is_fast_mode)
     # define the coefficients for one-body terms
-    operators.append(-para['hx']*op_half['sx'] - para['hz']*op_half['sz'])  # the 6th operator for magnetic fields
+    A.append_operators([-para['hx']*op_half['sx'] - para['hz']*op_half['sz']])  # the 6th operator for magnetic fields
     coeff1 = np.ones((index1.shape[0], 1))
     coeff2 = np.ones((index2.shape[0], 1))
     for i in range(0, index2.shape[0]):
@@ -52,8 +55,7 @@ def dmrg_finite_size(para=None):
             coeff2[i, 0] = para['jxy'] / 2
             coeff2[i + 1, 0] = para['jxy'] / 2
             coeff2[i + 2, 0] = para['jz']
-    # Initialize MPS
-    A = Mob(length=para['l'], d=para['d'], chi=para['chi'], way='qr', ini_way='r', debug=is_debug)
+
     A.correct_orthogonal_center(para['ob_position'])
     print('Starting to sweep ...')
     e0_total = 0
@@ -66,30 +68,15 @@ def dmrg_finite_size(para=None):
         for n in range(para['ob_position']+1, para['l']):
             if para['if_print_detail']:
                 print('update the %d-th tensor from left to right...' % n)
-            A.correct_orthogonal_center(n)  # move the orthogonal tensor to n
-            h_effect, s = A.effective_hamiltonian_dmrg(n, operators, index1, index2, coeff1, coeff2)
-            A.mps[n] = la.eigs(np.eye(h_effect.shape[0])-para['tau']*h_effect,
-                               k=1, which='LM', v0=A.mps[n].reshape(-1, 1).copy())[1].reshape(s)
-            if para['is_real']:
-                A.mps[n] = A.mps[n].real
+            A.update_tensor_eigs(n, index1, index2, coeff1, coeff2, para['tau'], para['is_real'])
         for n in range(para['l']-2, -1, -1):
             if para['if_print_detail']:
                 print('update the %d-th tensor from right to left...' % n)
-            A.correct_orthogonal_center(n)
-            h_effect, s = A.effective_hamiltonian_dmrg(n, operators, index1, index2, coeff1, coeff2)
-            A.mps[n] = la.eigs(np.eye(h_effect.shape[0])-para['tau']*h_effect,
-                               k=1, which='LM', v0=A.mps[n].reshape(-1, 1).copy())[1].reshape(s)
-            if para['is_real']:
-                A.mps[n] = A.mps[n].real
+            A.update_tensor_eigs(n, index1, index2, coeff1, coeff2, para['tau'], para['is_real'])
         for n in range(1, para['ob_position']):
             if para['if_print_detail']:
                 print('update the %d-th tensor from left to right...' % n)
-            A.correct_orthogonal_center(n)
-            h_effect, s = A.effective_hamiltonian_dmrg(n, operators, index1, index2, coeff1, coeff2)
-            A.mps[n] = la.eigs(np.eye(h_effect.shape[0])-para['tau']*h_effect,
-                               k=1, which='LM', v0=A.mps[n].reshape(-1, 1).copy())[1].reshape(s)
-            if para['is_real']:
-                A.mps[n] = A.mps[n].real
+            A.update_tensor_eigs(n, index1, index2, coeff1, coeff2, para['tau'], para['is_real'])
 
         if if_ob:
             ob['eb_full'] = A.observe_bond_energy(index2, coeff2, operators)
@@ -119,4 +106,6 @@ def dmrg_finite_size(para=None):
     # print(operators[4])
     # print(operators[5])
     # print(para['jxy'])
+    print('The length of effective_s: %d' % len(A.effect_s))
+    A.clean_to_save()
     return ob, A, info, para

@@ -174,7 +174,12 @@ def input_and_check_type(right_type, name, print_result=True, dict_name='para'):
     some_error = True
     while some_error:
         try:
-            value = eval(input('Please input the value of ' + name + ': '))
+            input_bad = True
+            while input_bad:
+                value = input('Please input the value of ' + name + ': ')
+                if value.__len__() > 0:
+                    value = eval(value)
+                    input_bad = False
             while not ok:
                 if isinstance(value, right_type):
                     ok = True
@@ -194,7 +199,12 @@ def input_and_check_value(right_value, values_str=(), names='', dict_name='', st
     some_error = True
     while some_error:
         try:
-            value = eval(input('Please input your choose: '))
+            input_bad = True
+            while input_bad:
+                value = input('Please input your choose: ')
+                if value.__len__() > 0:
+                    value = eval(value)
+                    input_bad = False
             right_value = np.array(right_value)
             while not ok:
                 if np.any(value == right_value):

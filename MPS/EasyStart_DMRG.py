@@ -9,6 +9,9 @@ from Basic_Functions_SJR import input_and_check_type, input_and_check_value, \
 from Tensor_Basic_Module import sort_vectors
 from DMRG_anyH import dmrg_finite_size
 
+is_from_input = True
+is_load_data = False
+
 
 def print_info_to_be_added(model, method):
     print(colored(model, 'cyan') + ' by ' + colored(method, 'cyan') + ' are to be added')
@@ -42,9 +45,6 @@ def sort_positions(pos, which='ascend'):
 
 
 # =========================================================
-is_from_input = True
-is_load_data = True
-
 print('Thanks for using EasyStart_DMRG!' + colored('(v2018.06-1, by S.J Ran)', 'cyan'))
 print_sep()
 print('For any questions or comments, please leave us messages on GitHub '
@@ -138,7 +138,7 @@ if is_from_input:
     # Fixed parameters
     para['if_print_detail'] = False
     para['tau'] = 1e-3  # shift to ensure the GS energy has the largest magnitude
-    para['break_tol'] = 1e-9  # tolerance for breaking the loop
+    para['break_tol'] = 1e-10  # tolerance for breaking the loop
     para['is_real'] = True
     para['dt_ob'] = 5  # in how many sweeps, observe to check the convergence
     para['ob_position'] = (para['l']/2).__int__()  # to check the convergence, chose a position to observe
@@ -212,7 +212,7 @@ if is_from_input:
             print(str(ob['mz'].T))
             if para['lattice'] == 'square':
                 print('Check the numbers of sites in .\\fig_dmrg\\' + para['lattice']
-                      + '(%d,%d).png' % (para['width'], para['height']))
+                      + '(%d,%d).png' % (para['square_width'], para['square_height']))
         elif x == 3:
             mp.plot(range(1, A.length), A.ent, '--or')
             mp.xlabel('lattice bond')

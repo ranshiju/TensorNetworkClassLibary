@@ -4,7 +4,7 @@ import numpy as np
 
 def spin_operators(spin):
     op = dict()
-    if spin == 'half' or abs(spin - 0.5) < 1e-10:
+    if spin is 'half':
         op['id'] = np.eye(2)
         op['sx'] = np.zeros((2, 2))
         op['sy'] = np.zeros((2, 2), dtype=np.complex)
