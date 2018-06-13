@@ -9,7 +9,7 @@ from Basic_Functions_SJR import input_and_check_type, input_and_check_value, \
 from Tensor_Basic_Module import sort_vectors
 from DMRG_anyH import dmrg_finite_size
 
-is_from_input = True
+is_from_input = False
 is_load_data = False
 
 
@@ -138,7 +138,8 @@ if is_from_input:
     # Fixed parameters
     para['if_print_detail'] = False
     para['tau'] = 1e-3  # shift to ensure the GS energy has the largest magnitude
-    para['break_tol'] = 1e-10  # tolerance for breaking the loop
+    para['eigs_tol'] = 1e-10
+    para['break_tol'] = 1e-8  # tolerance for breaking the loop
     para['is_real'] = True
     para['dt_ob'] = 5  # in how many sweeps, observe to check the convergence
     para['ob_position'] = (para['l']/2).__int__()  # to check the convergence, chose a position to observe
@@ -153,6 +154,7 @@ if is_from_input:
         para['data_exp'] = para['lattice'] + para['data_exp']
 else:
     para = parameter_dmrg()
+
 data_full_name = para['data_path'] + para['data_exp'] + '.pr'
 save_pr('.\\para_dmrg\\', '_para.pr', (para,), ('para',))
 print('The parameter have been saved as ' + colored('.\\para_dmrg\_para.pr', 'green'))
@@ -164,6 +166,9 @@ if is_load_data and opath.isfile(data_full_name) and (para['lattice'] is not 'ar
 elif (not is_load_data) or (not opath.isfile(data_full_name)) or (para['lattice'] is 'arbitrary'):
     ob, A, info, para = dmrg_finite_size(para)
 if (not opath.isfile(data_full_name)) or (para['lattice'] is 'arbitrary'):
+    if A._is_parallel:
+        A.pool.close()
+        A.pool.join()
     save_pr(para['data_path'], para['data_exp'] + '.pr', (ob, A, info, para), ('ob', 'A', 'info', 'para'))
     print('The data have been saved in ' + colored(para['data_path'].rstrip("\\"), 'green'))
 
